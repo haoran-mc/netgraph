@@ -14,7 +14,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/ga0/netgraph/web"
+	"github.com/haoran-mc/netgraph/web"
 	"golang.org/x/net/websocket"
 )
 
