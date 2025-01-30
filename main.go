@@ -11,23 +11,21 @@ import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
-	"github.com/google/gopacket/pcapgo"
 	"github.com/google/gopacket/tcpassembly"
 	"github.com/haoran-mc/netgraph/ngnet"
 )
 
-var device = flag.String("i", "", "Device to capture, auto select one if no device provided")
-var bpf = flag.String("bpf", "tcp port 80", "Set berkeley packet filter")
+var (
+	device = flag.String("i", "", "Device to capture, auto select one if no device provided")
+	bpf    = flag.String("bpf", "tcp port 80", "Set berkeley packet filter")
 
-var outputHTTP = flag.String("o", "", "Write HTTP request/response to file")
-var inputPcap = flag.String("input-pcap", "", "Open pcap file")
-var outputPcap = flag.String("output-pcap", "", "Write captured packet to a pcap file")
-var requestOnly = flag.Bool("output-request-only", true, "Write HTTP request only, drop response")
+	outputHTTP = flag.String("o", "", "Write HTTP request/response to file")
 
-var bindingPort = flag.Int("p", 9000, "Web server port. If the port is set to '0', the server will not run.")
-var saveEvent = flag.Bool("s", false, "Save HTTP event in server")
+	bindingPort = flag.Int("p", 9000, "Web server port. If the port is set to '0', the server will not run.")
+	saveEvent   = flag.Bool("s", false, "Save HTTP event in server")
 
-var verbose = flag.Bool("v", true, "Show more message")
+	verbose = flag.Bool("v", true, "Show more message")
+)
 
 // NGHTTPEventHandler handle HTTP events
 type NGHTTPEventHandler interface {
@@ -39,17 +37,8 @@ var handlers []NGHTTPEventHandler
 
 func init() {
 	flag.Parse()
-	if *inputPcap != "" && *outputPcap != "" {
-		log.Fatalln("ERROR: set -input-pcap and -output-pcap at the same time")
-	}
-	if *inputPcap != "" && *device != "" {
-		log.Fatalln("ERROR: set -input-pcap and -i at the same time")
-	}
 	if !*verbose {
 		log.SetOutput(io.Discard)
-	}
-	if *inputPcap != "" {
-		*saveEvent = true
 	}
 }
 
@@ -97,15 +86,6 @@ func autoSelectDev() string {
 }
 
 func packetSource() *gopacket.PacketSource {
-	if *inputPcap != "" {
-		handle, err := pcap.OpenOffline(*inputPcap)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		log.Printf("open pcap file \"%s\"\n", *inputPcap)
-		return gopacket.NewPacketSource(handle, handle.LinkType())
-	}
-
 	if *device == "" {
 		*device = autoSelectDev()
 		if *device == "" {
@@ -131,17 +111,6 @@ func runNGNet(packetSource *gopacket.PacketSource, eventChan chan<- interface{})
 	pool := tcpassembly.NewStreamPool(streamFactory)
 	assembler := tcpassembly.NewAssembler(pool)
 
-	var pcapWriter *pcapgo.Writer
-	if *outputPcap != "" {
-		outPcapFile, err := os.Create(*outputPcap)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		defer outPcapFile.Close()
-		pcapWriter = pcapgo.NewWriter(outPcapFile)
-		pcapWriter.WriteFileHeader(65536, layers.LinkTypeEthernet)
-	}
-
 	var count uint
 	ticker := time.Tick(time.Minute)
 	var lastPacketTimestamp time.Time
@@ -166,10 +135,6 @@ LOOP:
 			tcp, _ := transLayer.(*layers.TCP)
 			if tcp == nil {
 				continue
-			}
-
-			if pcapWriter != nil {
-				pcapWriter.WritePacket(packet.Metadata().CaptureInfo, packet.Data())
 			}
 
 			assembler.AssembleWithTimestamp(
@@ -248,9 +213,7 @@ func (p *EventPrinter) PushEvent(e interface{}) {
 	case ngnet.HTTPRequestEvent:
 		p.printHTTPRequestEvent(v)
 	case ngnet.HTTPResponseEvent:
-		if !*requestOnly {
-			p.printHTTPResponseEvent(v)
-		}
+		p.printHTTPResponseEvent(v)
 	default:
 		log.Printf("Unknown event: %v", e)
 	}

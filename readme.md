@@ -26,14 +26,8 @@ You can run Netgraph in your linux server without desktop environment installed,
             Set berkeley packet filter (default "tcp port 80")
       -i string
             Listen on interface, auto select one if no interface is provided
-      -input-pcap string
-            Open a pcap file
       -o string
             Write HTTP requests/responses to file, set value "stdout" to print to console
-      -output-pcap string
-            Write captured packet to a pcap file
-      -output-request-only
-    	      Write only HTTP request to file, drop response. Only used when option "-o" is present. (default true)
       -p int
             Web server port. If the port is set to '0', the server will not run.  (default 9000)
       -s	Save HTTP event in server
@@ -62,4 +56,7 @@ Example: print captured requests to stdout:
 
 [MIT](https://opensource.org/licenses/MIT)
 
+## TODO
 
+1. input-pcap
+2. output-pcap
