@@ -3,7 +3,7 @@ package web
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,7 +25,7 @@ func TestClient(t *testing.T) {
 			return nil
 		}
 		file, _ := os.Open(path)
-		content, _ := ioutil.ReadAll(file)
+		content, _ := io.ReadAll(file)
 		content2, err := GetContent("/" + path)
 		fmt.Println("FILE: ", path)
 		fmt.Println(string(content2[:10]))

@@ -3,17 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"time"
 
-	"github.com/ga0/netgraph/ngnet"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/google/gopacket/pcapgo"
 	"github.com/google/gopacket/tcpassembly"
+	"github.com/haoran-mc/netgraph/ngnet"
 )
 
 var device = flag.String("i", "", "Device to capture, auto select one if no device provided")
@@ -46,7 +46,7 @@ func init() {
 		log.Fatalln("ERROR: set -input-pcap and -i at the same time")
 	}
 	if !*verbose {
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 	if *inputPcap != "" {
 		*saveEvent = true

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"regexp"
 	"strconv"
 	"strings"
@@ -225,7 +225,7 @@ func (s *httpStream) getBody(method string, headers []HTTPHeaderItem, isRequest 
 	if contentEncoding == "gzip" {
 		buffer := bytes.NewBuffer(body)
 		zipReader, _ := gzip.NewReader(buffer)
-		uncompressedBody, err = ioutil.ReadAll(zipReader)
+		uncompressedBody, err = io.ReadAll(zipReader)
 		defer zipReader.Close()
 		if err != nil {
 			body = []byte("(gzip data uncompress error)")
