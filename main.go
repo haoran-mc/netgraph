@@ -56,43 +56,7 @@ func initEventHandlers() {
 	}
 }
 
-func autoSelectDev() string {
-	ifs, err := pcap.FindAllDevs()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	var available []string
-	for _, i := range ifs {
-		addrFound := false
-		var addrs []string
-		for _, addr := range i.Addresses {
-			if addr.IP.IsLoopback() ||
-				addr.IP.IsMulticast() ||
-				addr.IP.IsUnspecified() ||
-				addr.IP.IsLinkLocalUnicast() {
-				continue
-			}
-			addrFound = true
-			addrs = append(addrs, addr.IP.String())
-		}
-		if addrFound {
-			available = append(available, i.Name)
-		}
-	}
-	if len(available) > 0 {
-		return available[0]
-	}
-	return ""
-}
-
 func packetSource() *gopacket.PacketSource {
-	if *device == "" {
-		*device = autoSelectDev()
-		if *device == "" {
-			log.Fatalln("no device to capture")
-		}
-	}
-
 	handle, err := pcap.OpenLive(*device, 1024*1024, true, pcap.BlockForever)
 	if err != nil {
 		log.Fatalln(err)
