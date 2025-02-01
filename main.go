@@ -17,7 +17,7 @@ import (
 
 var (
 	device = flag.String("i", "", "Device to capture, auto select one if no device provided")
-	bpf    = flag.String("bpf", "tcp port 80", "Set berkeley packet filter")
+	bpf    = flag.String("bpf", "", "Set berkeley packet filter")
 
 	outputHTTP = flag.String("o", "", "Write HTTP request/response to file")
 
